@@ -6,8 +6,6 @@ data "aws_ssm_parameter" "ami" {
 locals {
   ec2_capacity_providers          = local.enabled ? var.capacity_providers_ec2 : {}
   external_ec2_capacity_providers = local.enabled ? var.external_ec2_capacity_providers : {}
-
-  instance_profile_name = join("", module.role.name)
 }
 
 locals {
