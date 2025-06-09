@@ -15,15 +15,15 @@ output "arn" {
 
 output "role_name" {
   description = "IAM role name"
-  value       = module.context.enabled ? join("", module.role.name) : null
+  value       = module.context.enabled ? module.role.name : null
 }
 
 output "role_arn" {
   description = "IAM role name"
-  value       = module.context.enabled ? join("", module.role.arn) : null
+  value       = module.context.enabled ? module.role.arn : null
 }
 
 output "role_instance_profile" {
   description = "IAM role name"
-  value       = module.context.enabled ? join("", module.role.instance_profile) : null
+  value       = module.context.enabled ? module.role.instance_profile : null
 }
