@@ -12,12 +12,12 @@ module "role" {
   ]
   path                  = "/"
   permissions_boundary  = ""
-  policy_description    = "Policy for EC2 Capacity providers"
+  policy_description    = "Policy for ECS EC2 role"
   policy_document_count = length(var.policy_document)
   policy_documents      = var.policy_document
   principals = {
     Service = ["ec2.amazonaws.com"]
   }
-  role_description = "IAM role for EC2 test instances in ${each.key} layer"
+  role_description = "IAM role for ECS EC2"
   use_fullname     = true
 }
