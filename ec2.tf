@@ -6,8 +6,6 @@ data "aws_ssm_parameter" "ami" {
 locals {
   ec2_capacity_providers          = local.enabled ? var.capacity_providers_ec2 : {}
   external_ec2_capacity_providers = local.enabled ? var.external_ec2_capacity_providers : {}
-
-  instance_profile_name = join("", aws_iam_instance_profile.default[*].name)
 }
 
 locals {
@@ -28,13 +26,13 @@ EOT
 
 module "ecs_labels" {
   for_each = local.ec2_capacity_providers
-  source   = "cloudposse/label/null"
-  version  = "0.25.0" # requires Terraform >= 0.13.0
+  source   = "SevenPico/context/null"
+  version  = "2.0.0"
 
   enabled    = var.enabled
-  attributes = concat(module.this.context.attributes, [each.key])
-  tags       = merge(module.this.context.tags, { "AmazonECSManaged" : "true" })
-  context    = module.this.context
+  attributes = concat(module.context.attributes, [each.key])
+  tags       = merge(module.context.tags, { "AmazonECSManaged" : "true" })
+  context    = module.context.self
 }
 
 module "autoscale_group" {
@@ -43,7 +41,7 @@ module "autoscale_group" {
   source  = "cloudposse/ec2-autoscale-group/aws"
   version = "0.39.0"
 
-  context = module.ecs_labels[each.key].context
+  context = module.ecs_labels[each.key].legacy
 
   image_id      = each.value["image_id"] == null ? join("", data.aws_ssm_parameter.ami[*].value) : each.value["image_id"]
   instance_type = each.value["instance_type"]
@@ -57,7 +55,7 @@ module "autoscale_group" {
   autoscaling_policies_enabled = false
   default_alarms_enabled       = false
 
-  iam_instance_profile_name = local.instance_profile_name
+  iam_instance_profile_name = module.role.name
   user_data_base64          = base64encode(local.user_data[each.key])
 
   instance_initiated_shutdown_behavior = each.value["instance_initiated_shutdown_behavior"]
