@@ -1,3 +1,7 @@
+provider "aws" {
+  region = var.region
+}
+
 module "vpc" {
   source                  = "registry.terraform.io/SevenPico/vpc/aws"
   version                 = "3.0.2"
