@@ -14,16 +14,16 @@ output "arn" {
 }
 
 output "role_name" {
-  description = "IAM role name (created externally)"
-  value       = aws_iam_role.ecs_role.name
+  description = "IAM role name (created by module)"
+  value       = module.ecs_cluster.role_name
 }
 
 output "role_arn" {
-  description = "IAM role ARN (created externally)"
-  value       = aws_iam_role.ecs_role.arn
+  description = "IAM role ARN (created by module)"
+  value       = module.ecs_cluster.role_arn
 }
 
 output "role_instance_profile" {
-  description = "IAM instance profile name (created externally)"
-  value       = aws_iam_instance_profile.ecs_instance_profile.name
+  description = "IAM instance profile name (created by module)"
+  value       = module.ecs_cluster.role_instance_profile
 }

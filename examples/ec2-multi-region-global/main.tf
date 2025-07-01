@@ -21,48 +21,6 @@ module "subnets" {
   context              = module.context.self
 }
 
-# Create IAM role that will be shared across regions
-resource "aws_iam_role" "ecs_role" {
-  name = "${module.context.id}-ecs-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      }
-    ]
-  })
-
-  tags = module.context.tags
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_role_policy" {
-  role       = aws_iam_role.ecs_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
-}
-
-resource "aws_iam_role_policy_attachment" "ssm_role_policy" {
-  role       = aws_iam_role.ecs_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
-  role       = aws_iam_role.ecs_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-resource "aws_iam_instance_profile" "ecs_instance_profile" {
-  name = "${module.context.id}-ecs-instance-profile"
-  role = aws_iam_role.ecs_role.name
-
-  tags = module.context.tags
-}
-
 module "ecs_cluster" {
   source = "../.."
 
@@ -73,6 +31,7 @@ module "ecs_cluster" {
   capacity_providers_fargate_spot = false
   capacity_providers_ec2 = {
     ec2_default = {
+      name                        = "ec2_default_global"
       instance_type               = "t3.medium"
       security_group_ids          = [module.vpc.vpc_default_security_group_id]
       subnet_ids                  = module.subnets.private_subnet_ids
@@ -82,9 +41,8 @@ module "ecs_cluster" {
     }
   }
 
-  # Use externally managed IAM role
-  create_iam_role        = false
-  existing_iam_role_name = aws_iam_role.ecs_role.name
+  # Create IAM role that will be shared across regions
+  create_iam_role = true
 
   policy_document = []
 }

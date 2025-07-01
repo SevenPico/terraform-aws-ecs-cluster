@@ -15,15 +15,15 @@ output "arn" {
 
 output "role_name" {
   description = "IAM role name (from global region)"
-  value       = data.aws_iam_role.existing_ecs_role.name
+  value       = module.ecs_cluster.role_name
 }
 
 output "role_arn" {
   description = "IAM role ARN (from global region)"
-  value       = data.aws_iam_role.existing_ecs_role.arn
+  value       = module.ecs_cluster.role_arn
 }
 
 output "role_instance_profile" {
   description = "IAM instance profile name (from global region)"
-  value       = data.aws_iam_instance_profile.existing_ecs_instance_profile.name
+  value       = module.ecs_cluster.role_instance_profile
 }

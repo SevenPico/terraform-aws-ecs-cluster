@@ -21,14 +21,6 @@ module "subnets" {
   context              = module.context.self
 }
 
-# Data source to reference the existing IAM role created in the global region
-data "aws_iam_role" "existing_ecs_role" {
-  name = var.global_iam_role_name
-}
-
-data "aws_iam_instance_profile" "existing_ecs_instance_profile" {
-  name = var.global_iam_role_name
-}
 
 module "ecs_cluster" {
   source = "../.."
@@ -40,6 +32,7 @@ module "ecs_cluster" {
   capacity_providers_fargate_spot = false
   capacity_providers_ec2 = {
     ec2_default = {
+      name                        = "ec2_default_secondary"
       instance_type               = "t3.medium"
       security_group_ids          = [module.vpc.vpc_default_security_group_id]
       subnet_ids                  = module.subnets.private_subnet_ids

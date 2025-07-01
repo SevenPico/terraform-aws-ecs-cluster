@@ -72,7 +72,6 @@ module "autoscale_group" {
   mixed_instances_policy     = each.value["mixed_instances_policy"] == null ? null : merge(each.value["mixed_instances_policy"], { override = null })
   placement                  = each.value["placement"]
   credit_specification       = each.value["credit_specification"]
-  elastic_gpu_specifications = each.value["elastic_gpu_specifications"]
   disable_api_termination    = each.value["disable_api_termination"]
   max_size                   = each.value["max_size"]
   min_size                   = each.value["min_size"]

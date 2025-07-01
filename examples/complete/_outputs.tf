@@ -1,14 +1,14 @@
 output "name" {
   description = "ECS cluster name"
-  value       = module.ecs_cluster.name
+  value       = var.enabled ? module.ecs_cluster[0].name : ""
 }
 
 output "id" {
   description = "ECS cluster id"
-  value       = module.ecs_cluster.id
+  value       = var.enabled ? module.ecs_cluster[0].id : ""
 }
 
 output "arn" {
   description = "ECS cluster arn"
-  value       = module.ecs_cluster.arn
+  value       = var.enabled ? module.ecs_cluster[0].arn : ""
 }
