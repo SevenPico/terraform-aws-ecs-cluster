@@ -223,3 +223,25 @@ variable "policy_document" {
   type        = list(string)
   default     = []
 }
+
+variable "create_iam_role" {
+  type        = bool
+  description = "Whether to create IAM role and instance profile for ECS instances"
+  default     = true
+}
+
+variable "existing_iam_role_name" {
+  type        = string
+  description = "Name of existing IAM role to use when create_iam_role is false. Role must exist in the same AWS account and have appropriate ECS policies attached."
+  default     = null
+
+  validation {
+    condition     = var.create_iam_role || var.existing_iam_role_name != null
+    error_message = "existing_iam_role_name must be provided when create_iam_role is false."
+  }
+
+  validation {
+    condition     = var.existing_iam_role_name == null || can(regex("^[a-zA-Z0-9+=,.@_-]+$", var.existing_iam_role_name))
+    error_message = "existing_iam_role_name must be a valid IAM role name."
+  }
+}
