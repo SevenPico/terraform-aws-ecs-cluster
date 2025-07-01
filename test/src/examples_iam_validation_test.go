@@ -12,7 +12,7 @@ import (
 
 // Test IAM validation scenarios
 func TestExamplesIAMValidation(t *testing.T) {
-	t.Parallel()
+	// Remove t.Parallel() to avoid resource conflicts with other tests
 	randID := strings.ToLower(random.UniqueId())
 	attributes := []string{randID}
 
@@ -55,7 +55,7 @@ func TestExamplesIAMValidation(t *testing.T) {
 
 // Test that existing IAM role validation works
 func TestExamplesExistingIAMRoleValidation(t *testing.T) {
-	t.Parallel()
+	// Remove t.Parallel() to avoid resource conflicts with other tests
 	randID := strings.ToLower(random.UniqueId())
 	attributes := []string{randID}
 

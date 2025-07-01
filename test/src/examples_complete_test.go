@@ -77,7 +77,7 @@ func TestExamplesComplete(t *testing.T) {
 }
 
 func TestExamplesCompleteDisabled(t *testing.T) {
- t.Parallel()
+ // Remove t.Parallel() to avoid resource conflicts with other tests
  randID := strings.ToLower(random.UniqueId())
  attributes := []string{randID}
 

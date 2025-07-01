@@ -12,7 +12,7 @@ import (
 
 // Test the EC2 multi-region examples
 func TestExamplesEC2MultiRegion(t *testing.T) {
-	t.Parallel()
+	// Remove t.Parallel() to avoid resource conflicts with other tests
 	randID := strings.ToLower(random.UniqueId())
 	attributes := []string{randID}
 
