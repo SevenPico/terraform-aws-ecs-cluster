@@ -226,22 +226,29 @@ variable "policy_document" {
 
 variable "create_iam_role" {
   type        = bool
-  description = "Whether to create IAM role and instance profile for ECS instances"
+  description = "Whether to create IAM role and instance profile for ECS instances. Only required when using EC2 capacity providers (capacity_providers_ec2 or external_ec2_capacity_providers)."
   default     = true
 }
 
 variable "existing_iam_role_name" {
   type        = string
-  description = "Name of existing IAM role to use when create_iam_role is false. Role must exist in the same AWS account and have appropriate ECS policies attached."
+  description = "Name of existing IAM role to use when create_iam_role is false. Only required when using EC2 capacity providers."
   default     = null
 
   validation {
-    condition     = var.create_iam_role || var.existing_iam_role_name != null
-    error_message = "existing_iam_role_name must be provided when create_iam_role is false."
+    # Check if IAM is required based on EC2 capacity providers
+    condition     = (length(var.capacity_providers_ec2) == 0 && length(var.external_ec2_capacity_providers) == 0) || var.create_iam_role || var.existing_iam_role_name != null
+    error_message = "When using EC2 capacity providers (capacity_providers_ec2 or external_ec2_capacity_providers), you must either set create_iam_role=true or provide existing_iam_role_name."
   }
 
   validation {
     condition     = var.existing_iam_role_name == null || can(regex("^[a-zA-Z0-9+=,.@_-]+$", var.existing_iam_role_name))
-    error_message = "existing_iam_role_name must be a valid IAM role name."
+    error_message = "existing_iam_role_name must be a valid IAM role name when provided."
+  }
+
+  validation {
+    # Warn if IAM role name is provided but no EC2 capacity providers are configured
+    condition     = (length(var.capacity_providers_ec2) > 0 || length(var.external_ec2_capacity_providers) > 0) || var.existing_iam_role_name == null
+    error_message = "existing_iam_role_name should not be set when only using Fargate capacity providers (no EC2 capacity providers configured)."
   }
 }

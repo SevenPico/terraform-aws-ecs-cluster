@@ -2,6 +2,13 @@ locals {
   enabled      = module.context.enabled
   cluster_name = join("", aws_ecs_cluster.default[*].name)
 
+  # Scenario detection and validation locals
+  has_fargate_providers = var.capacity_providers_fargate || var.capacity_providers_fargate_spot
+  has_ec2_providers     = length(var.capacity_providers_ec2) > 0 || length(var.external_ec2_capacity_providers) > 0
+  requires_iam          = local.has_ec2_providers
+  scenario              = local.has_fargate_providers && local.has_ec2_providers ? "mixed" : local.has_fargate_providers ? "pure_fargate" : local.has_ec2_providers ? "pure_ec2" : "invalid"
+
+
   capacity_providers_fargate = [
     for name, is_enabled in {
       FARGATE : var.capacity_providers_fargate,
