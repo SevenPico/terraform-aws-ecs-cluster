@@ -8,6 +8,15 @@ locals {
   requires_iam          = local.has_ec2_providers
   scenario              = local.has_fargate_providers && local.has_ec2_providers ? "mixed" : local.has_fargate_providers ? "pure_fargate" : local.has_ec2_providers ? "pure_ec2" : "invalid"
 
+  # IAM role validation
+  iam_role_validation = local.has_ec2_providers ? (
+    var.create_iam_role || var.existing_iam_role_name != null ? "valid" : "invalid"
+  ) : "not_required"
+
+  # Validation error messages
+  validate_iam_role_required    = local.iam_role_validation == "invalid" ? tobool("When using EC2 capacity providers (capacity_providers_ec2 or external_ec2_capacity_providers), you must either set create_iam_role=true or provide existing_iam_role_name.") : true
+  validate_iam_role_unnecessary = !local.has_ec2_providers && var.existing_iam_role_name != null ? tobool("existing_iam_role_name should not be set when only using Fargate capacity providers (no EC2 capacity providers configured).") : true
+
 
   capacity_providers_fargate = [
     for name, is_enabled in {
