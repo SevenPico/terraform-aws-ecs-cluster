@@ -223,3 +223,8 @@ variable "policy_document" {
   type        = list(string)
   default     = []
 }
+
+variable "iam_instance_profile_name" {
+  type    = string
+  default = null
+}

@@ -1,7 +1,12 @@
+locals {
+  enable_iam_role = var.iam_instance_profile_name != null && var.iam_instance_profile_name != ""
+}
+
 module "role" {
   source  = "SevenPicoForks/iam-role/aws"
   version = "2.0.2"
   context = module.context.self
+  enabled = module.context.enabled && local.enable_iam_role
 
   instance_profile_enabled = true
   max_session_duration     = 3600
