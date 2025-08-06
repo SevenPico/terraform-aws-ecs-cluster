@@ -1,5 +1,10 @@
 locals {
-  enable_iam_role = var.iam_instance_profile_name != null && var.iam_instance_profile_name != ""
+  enable_iam_role = var.iam_instance_profile_name == null || var.iam_instance_profile_name == ""
+}
+
+data "aws_iam_instance_profile" "external" {
+  count = local.enabled && !local.enable_iam_role ? 1 : 0
+  name  = var.iam_instance_profile_name
 }
 
 module "role" {

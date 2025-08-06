@@ -55,7 +55,7 @@ module "autoscale_group" {
   autoscaling_policies_enabled = false
   default_alarms_enabled       = false
 
-  iam_instance_profile_name = local.enable_iam_role ? var.iam_instance_profile_name : module.role.name
+  iam_instance_profile_name = local.enable_iam_role ? module.role.name : var.iam_instance_profile_name
   user_data_base64          = base64encode(local.user_data[each.key])
 
   instance_initiated_shutdown_behavior = each.value["instance_initiated_shutdown_behavior"]

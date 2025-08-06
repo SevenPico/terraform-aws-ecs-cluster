@@ -225,6 +225,7 @@ variable "policy_document" {
 }
 
 variable "iam_instance_profile_name" {
-  type    = string
-  default = null
+  description = "Name of an existing IAM instance profile to use for EC2 instances. If not provided, the module will create its own IAM role and instance profile."
+  type        = string
+  default     = null
 }

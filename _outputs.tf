@@ -15,15 +15,15 @@ output "arn" {
 
 output "role_name" {
   description = "IAM role name"
-  value       = module.context.enabled ? module.role.name : null
+  value       = local.enable_iam_role ? module.role.name : try(data.aws_iam_instance_profile.external[0].role_name, null)
 }
 
 output "role_arn" {
-  description = "IAM role name"
-  value       = module.context.enabled ? module.role.arn : null
+  description = "IAM role ARN"
+  value       = local.enable_iam_role ? module.role.arn : try(data.aws_iam_instance_profile.external[0].role_arn, null)
 }
 
 output "role_instance_profile" {
-  description = "IAM role name"
-  value       = module.context.enabled ? module.role.instance_profile : null
+  description = "IAM instance profile name"
+  value       = local.enable_iam_role ? module.role.instance_profile : var.iam_instance_profile_name
 }
