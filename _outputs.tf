@@ -14,16 +14,16 @@ output "arn" {
 }
 
 output "role_name" {
-  description = "IAM role name"
-  value       = local.enable_iam_role ? module.role.name : try(data.aws_iam_instance_profile.external[0].role_name, null)
+  description = "IAM role name (only applicable when using EC2 capacity providers)"
+  value       = local.has_ec2_capacity_providers ? (local.enable_iam_role ? module.role.name : try(data.aws_iam_instance_profile.external[0].role_name, null)) : null
 }
 
 output "role_arn" {
-  description = "IAM role ARN"
-  value       = local.enable_iam_role ? module.role.arn : try(data.aws_iam_instance_profile.external[0].role_arn, null)
+  description = "IAM role ARN (only applicable when using EC2 capacity providers)"
+  value       = local.has_ec2_capacity_providers ? (local.enable_iam_role ? module.role.arn : try(data.aws_iam_instance_profile.external[0].role_arn, null)) : null
 }
 
 output "role_instance_profile" {
-  description = "IAM instance profile name"
-  value       = local.enable_iam_role ? module.role.instance_profile : var.iam_instance_profile_name
+  description = "IAM instance profile name (only applicable when using EC2 capacity providers)"
+  value       = local.has_ec2_capacity_providers ? (local.enable_iam_role ? module.role.instance_profile : var.iam_instance_profile_name) : null
 }

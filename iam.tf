@@ -1,9 +1,10 @@
 locals {
-  enable_iam_role = var.iam_instance_profile_name == null || var.iam_instance_profile_name == ""
+  has_ec2_capacity_providers = length(var.capacity_providers_ec2) > 0 || length(var.external_ec2_capacity_providers) > 0
+  enable_iam_role = local.has_ec2_capacity_providers && (var.iam_instance_profile_name == null || var.iam_instance_profile_name == "")
 }
 
 data "aws_iam_instance_profile" "external" {
-  count = local.enabled && !local.enable_iam_role ? 1 : 0
+  count = local.enabled && local.has_ec2_capacity_providers && !local.enable_iam_role ? 1 : 0
   name  = var.iam_instance_profile_name
 }
 
