@@ -229,3 +229,9 @@ variable "iam_instance_profile_name" {
   type        = string
   default     = null
 }
+
+variable "enable_iam_role" {
+  description = "Whether to create an IAM role and instance profile for EC2 instances. If false, you must provide iam_instance_profile_name."
+  type        = bool
+  default     = true
+}

@@ -1,11 +1,5 @@
-locals {
-  has_ec2_capacity_providers = length(var.capacity_providers_ec2) > 0 || length(var.external_ec2_capacity_providers) > 0
-  external_profile_provided = var.iam_instance_profile_name != null && var.iam_instance_profile_name != ""
-  enable_iam_role = local.has_ec2_capacity_providers && !local.external_profile_provided
-}
-
 data "aws_iam_instance_profile" "external" {
-  count = local.enabled && local.has_ec2_capacity_providers && local.external_profile_provided ? 1 : 0
+  count = local.enabled && !var.enable_iam_role && var.iam_instance_profile_name != null ? 1 : 0
   name  = var.iam_instance_profile_name
 }
 
@@ -13,7 +7,7 @@ module "role" {
   source  = "SevenPicoForks/iam-role/aws"
   version = "2.0.2"
   context = module.context.self
-  enabled = module.context.enabled && local.enable_iam_role
+  enabled = module.context.enabled && var.enable_iam_role
 
   instance_profile_enabled = true
   max_session_duration     = 3600
