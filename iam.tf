@@ -1,5 +1,5 @@
 data "aws_iam_instance_profile" "external" {
-  count = local.enabled && !var.enable_iam_role && var.iam_instance_profile_name != null ? 1 : 0
+  count = local.enabled && !var.enable_iam_role && var.iam_instance_profile_name != null && var.iam_instance_profile_name != "" ? 1 : 0
   name  = var.iam_instance_profile_name
 }
 
