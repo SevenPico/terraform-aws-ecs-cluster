@@ -223,3 +223,26 @@ variable "service_discovery_namespace_arn" {
   type        = string
   default     = null
 }
+
+variable "policy_document" {
+  description = "A list of IAM policy documents (JSON) to attach inline to the role"
+  type        = list(string)
+  default     = []
+}
+
+variable "iam_instance_profile_name" {
+  description = "Name of an existing IAM instance profile to use for EC2 instances. If not provided, the module will create its own IAM role and instance profile."
+  type        = string
+  default     = null
+}
+
+
+
+variable "enable_iam_role" {
+  description = "Whether to create an IAM role and instance profile for EC2 instances. If false, you must provide iam_instance_profile_name."
+  type        = bool
+  default     = true
+
+}
+
+
