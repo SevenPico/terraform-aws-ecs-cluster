@@ -6,6 +6,8 @@ data "aws_ssm_parameter" "ami" {
 locals {
   ec2_capacity_providers          = local.enabled ? var.capacity_providers_ec2 : {}
   external_ec2_capacity_providers = local.enabled ? var.external_ec2_capacity_providers : {}
+
+  instance_profile_name = join("", aws_iam_instance_profile.default[*].name)
 }
 
 locals {
@@ -26,22 +28,22 @@ EOT
 
 module "ecs_labels" {
   for_each = local.ec2_capacity_providers
-  source   = "SevenPico/context/null"
-  version  = "2.0.0"
+  source   = "cloudposse/label/null"
+  version  = "0.25.0" # requires Terraform >= 0.13.0
 
   enabled    = var.enabled
-  attributes = concat(module.context.attributes, [each.key])
-  tags       = merge(module.context.tags, { "AmazonECSManaged" : "true" })
-  context    = module.context.self
+  attributes = concat(module.this.context.attributes, [each.key])
+  tags       = merge(module.this.context.tags, { "AmazonECSManaged" : "true" })
+  context    = module.this.context
 }
 
 module "autoscale_group" {
   for_each = local.ec2_capacity_providers
 
   source  = "cloudposse/ec2-autoscale-group/aws"
-  version = "0.39.0"
+  version = "0.41.1"
 
-  context = module.ecs_labels[each.key].legacy
+  context = module.ecs_labels[each.key].context
 
   image_id      = each.value["image_id"] == null ? join("", data.aws_ssm_parameter.ami[*].value) : each.value["image_id"]
   instance_type = each.value["instance_type"]
@@ -55,7 +57,7 @@ module "autoscale_group" {
   autoscaling_policies_enabled = false
   default_alarms_enabled       = false
 
-  iam_instance_profile_name = var.enable_iam_role ? module.role.name : var.iam_instance_profile_name
+  iam_instance_profile_name = local.instance_profile_name
   user_data_base64          = base64encode(local.user_data[each.key])
 
   instance_initiated_shutdown_behavior = each.value["instance_initiated_shutdown_behavior"]
@@ -66,16 +68,15 @@ module "autoscale_group" {
   enable_monitoring                    = each.value["enable_monitoring"]
   ebs_optimized                        = each.value["ebs_optimized"]
   ## Workaround to solve option type validation failure.
-  block_device_mappings      = jsondecode(jsonencode(each.value["block_device_mappings"]))
-  instance_market_options    = jsondecode(jsonencode(each.value["instance_market_options"]))
-  instance_refresh           = each.value["instance_refresh"]
-  mixed_instances_policy     = each.value["mixed_instances_policy"] == null ? null : merge(each.value["mixed_instances_policy"], { override = null })
-  placement                  = each.value["placement"]
-  credit_specification       = each.value["credit_specification"]
-  elastic_gpu_specifications = each.value["elastic_gpu_specifications"]
-  disable_api_termination    = each.value["disable_api_termination"]
-  max_size                   = each.value["max_size"]
-  min_size                   = each.value["min_size"]
+  block_device_mappings   = jsondecode(jsonencode(each.value["block_device_mappings"]))
+  instance_market_options = jsondecode(jsonencode(each.value["instance_market_options"]))
+  instance_refresh        = each.value["instance_refresh"]
+  mixed_instances_policy  = each.value["mixed_instances_policy"] == null ? null : merge(each.value["mixed_instances_policy"], { override = null })
+  placement               = each.value["placement"]
+  credit_specification    = each.value["credit_specification"]
+  disable_api_termination = each.value["disable_api_termination"]
+  max_size                = each.value["max_size"]
+  min_size                = each.value["min_size"]
   ## Desired capacity managed by ECS so by default we set it equal min_size
   desired_capacity                     = each.value["min_size"]
   default_cooldown                     = each.value["default_cooldown"]
@@ -98,7 +99,8 @@ module "autoscale_group" {
   warm_pool                            = each.value["warm_pool"]
   instance_reuse_policy                = each.value["instance_reuse_policy"]
 
-  update_default_version = each.value["update_default_version"]
+  launch_template_version = each.value["launch_template_version"]
+  update_default_version  = each.value["update_default_version"]
 }
 
 resource "aws_ecs_capacity_provider" "ec2" {
