@@ -1,7 +1,11 @@
-variable "container_insights_enabled" {
-  description = "Whether or not to enable container insights"
-  type        = bool
-  default     = true
+variable "container_insights_mode" {
+  description = "Container insights mode. Valid values: 'enhanced', 'enabled', 'disabled'. NOTE: `enhanced` is more costly, but as described by AWS, it 'provides detailed health and performance metrics at task and container level in addition to aggregated metrics at cluster and service level. Enables easier drill downs for faster problem isolation and troubleshooting.' (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cloudwatch-container-insights.html)"
+  type        = string
+  default     = "enabled"
+  validation {
+    condition     = contains(["enhanced", "enabled", "disabled"], var.container_insights_mode)
+    error_message = "The 'container_insights_mode' value must be one of 'enhanced', 'enabled', 'disabled'"
+  }
 }
 
 variable "kms_key_id" {
@@ -92,8 +96,12 @@ variable "capacity_providers_ec2" {
     instance_refresh = optional(object({
       strategy = string
       preferences = object({
-        instance_warmup        = number
-        min_healthy_percentage = number
+        instance_warmup              = number
+        min_healthy_percentage       = number
+        skip_matching                = bool
+        auto_rollback                = bool
+        scale_in_protected_instances = string
+        standby_instances            = string
       })
       triggers = list(string)
     }))
@@ -116,9 +124,6 @@ variable "capacity_providers_ec2" {
     }))
     credit_specification = optional(object({
       cpu_credits = string
-    }))
-    elastic_gpu_specifications = optional(object({
-      type = string
     }))
     disable_api_termination   = optional(bool, false)
     default_cooldown          = optional(number, 300)
@@ -159,6 +164,7 @@ variable "capacity_providers_ec2" {
     tag_specifications_resource_types    = optional(set(string), ["instance", "volume"])
     max_instance_lifetime                = optional(number, null)
     capacity_rebalance                   = optional(bool, false)
+    launch_template_version              = optional(string, "$Latest")
     update_default_version               = optional(bool, false)
     warm_pool = optional(object({
       pool_state                  = string
@@ -223,3 +229,20 @@ variable "policy_document" {
   type        = list(string)
   default     = []
 }
+
+variable "iam_instance_profile_name" {
+  description = "Name of an existing IAM instance profile to use for EC2 instances. If not provided, the module will create its own IAM role and instance profile."
+  type        = string
+  default     = null
+}
+
+
+
+variable "enable_iam_role" {
+  description = "Whether to create an IAM role and instance profile for EC2 instances. If false, you must provide iam_instance_profile_name."
+  type        = bool
+  default     = true
+
+}
+
+
